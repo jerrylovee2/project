@@ -24,6 +24,12 @@ export default function Home() {
   const timerRef = useRef<NodeJS.Timeout>();
   const modalTimerRef = useRef<NodeJS.Timeout>();
 
+  const toggleTheme = () => {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+    root.classList.toggle('dark');
+  };
+
   useEffect(() => {
     if (clickTracker.startTime) {
       timerRef.current = setInterval(() => {
@@ -62,7 +68,7 @@ export default function Home() {
     };
   }, [showModal]);
 
-  const handlePenguinEyeClick = () => {
+  const handleTorchClick = () => {
     const now = Date.now();
     
     if (!clickTracker.startTime) {
@@ -70,6 +76,7 @@ export default function Home() {
         count: 1,
         startTime: now
       });
+      toggleTheme();
     } else {
       const elapsed = (now - clickTracker.startTime) / 1000;
       
@@ -83,17 +90,20 @@ export default function Home() {
             startTime: null
           });
           clearInterval(timerRef.current);
+          toggleTheme();
         } else {
           setClickTracker(prev => ({
             ...prev,
             count: newCount
           }));
+          toggleTheme();
         }
       } else {
         setClickTracker({
           count: 1,
           startTime: now
         });
+        toggleTheme();
       }
     }
   };
@@ -167,17 +177,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-100 dark:from-slate-900 dark:to-slate-800">
       {!isAuthenticated ? (
         <>
-          <div className="text-center py-12">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              🐧 PenguinLock
-            </h1>
-            <p className="text-gray-600 text-lg">
-              Your secrets are safe with Skipper
-            </p>
-          </div>
 
           <div className="flex justify-center items-center py-16">
             <div className="relative">
@@ -195,19 +197,21 @@ export default function Home() {
                     cy="73" 
                     r="4" 
                     fill="#2c3e50" 
-                    className="cursor-pointer hover:fill-blue-600 transition-colors"
-                    onClick={handlePenguinEyeClick}
                   />
                   <circle 
                     cx="112" 
                     cy="73" 
                     r="4" 
                     fill="#2c3e50" 
-                    className="cursor-pointer hover:fill-blue-600 transition-colors"
-                    onClick={handlePenguinEyeClick}
                   />
                   <ellipse cx="65" cy="120" rx="12" ry="25" fill="#2c3e50" transform="rotate(-20 65 120)" />
                   <ellipse cx="135" cy="120" rx="12" ry="25" fill="#2c3e50" transform="rotate(20 135 120)" />
+                  {/* Torch in right flipper */}
+                  <g className="cursor-pointer" onClick={handleTorchClick}>
+                    <rect x="146" y="98" width="8" height="28" fill="#8b5e3c" transform="rotate(20 150 112)" />
+                    <circle cx="150" cy="95" r="7" fill="#f59e0b" className="transition-all" />
+                    <circle cx="150" cy="95" r="12" fill="rgba(245, 158, 11, 0.25)" />
+                  </g>
                   <ellipse cx="85" cy="190" rx="8" ry="12" fill="#f39c12" />
                   <ellipse cx="115" cy="190" rx="8" ry="12" fill="#f39c12" />
                 </svg>
@@ -217,29 +221,6 @@ export default function Home() {
 
           <div className="max-w-4xl mx-auto px-6 pb-16">
             <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-white rounded-xl p-6 shadow-md text-center">
-                <Lock className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Secure Storage</h3>
-                <p className="text-gray-600 text-sm">
-                  Military-grade encryption keeps your secrets safe
-                </p>
-              </div>
-              
-              <div className="bg-white rounded-xl p-6 shadow-md text-center">
-                <Shield className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Hidden Access</h3>
-                <p className="text-gray-600 text-sm">
-                  Only you know the secret way to access your data
-                </p>
-              </div>
-              
-              <div className="bg-white rounded-xl p-6 shadow-md text-center">
-                <Eye className="h-12 w-12 text-purple-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Zero Knowledge</h3>
-                <p className="text-gray-600 text-sm">
-                  We never see your passwords or personal information
-                </p>
-              </div>
             </div>
           </div>
         </>
@@ -254,11 +235,11 @@ export default function Home() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 max-w-md w-full shadow-2xl">
             <div className="text-center mb-6">
               <div className="text-6xl mb-4">🐧</div>
-              <h2 className="text-2xl font-bold text-gray-800">Access Granted!</h2>
-              <p className="text-gray-600 mt-2">Skipper needs the secret code</p>
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Access Granted!</h2>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">Skipper needs the secret code</p>
             </div>
 
             <div className="space-y-4">
@@ -268,7 +249,7 @@ export default function Home() {
                   value={masterKey}
                   onChange={(e) => setMasterKey(e.target.value)}
                   placeholder="Enter master key"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
                 />
               </div>
 
@@ -286,7 +267,7 @@ export default function Home() {
                     setMasterKey('');
                     setError('');
                   }}
-                  className="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors"
+                  className="flex-1 px-4 py-3 bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-800 dark:text-gray-100 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
@@ -328,15 +309,15 @@ function SecretsDashboard({ secrets, onAddSecret, onShowSecrets, showSecrets }: 
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-100 dark:from-slate-900 dark:to-slate-800 p-6">
       <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-2xl p-8 shadow-lg mb-8">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="text-4xl">🐧</div>
               <div>
-                <h2 className="text-3xl font-bold text-gray-800">PenguinLock Vault</h2>
-                <p className="text-gray-600 mt-1">Your secrets are secure with Skipper</p>
+                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">PenguinLock Vault</h2>
+                <p className="text-gray-600 dark:text-gray-300 mt-1">Your secrets are secure with Skipper</p>
               </div>
             </div>
             <div className="flex space-x-4">
@@ -359,14 +340,14 @@ function SecretsDashboard({ secrets, onAddSecret, onShowSecrets, showSecrets }: 
         </div>
 
         {showForm && (
-          <div className="bg-white rounded-2xl p-8 shadow-lg mb-8">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg mb-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-gray-800">Add New Secret</h3>
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Add New Secret</h3>
               <button
                 onClick={() => setShowForm(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
               >
-                <X className="h-5 w-5 text-gray-500" />
+                <X className="h-5 w-5 text-gray-500 dark:text-gray-300" />
               </button>
             </div>
             <div className="grid md:grid-cols-2 gap-4 mb-6">
@@ -375,21 +356,21 @@ function SecretsDashboard({ secrets, onAddSecret, onShowSecrets, showSecrets }: 
                 value={newSecret.email}
                 onChange={(e) => setNewSecret(prev => ({ ...prev, email: e.target.value }))}
                 placeholder="Email"
-                className="px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
+                className="px-4 py-3 border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
               />
               <input
                 type="password"
                 value={newSecret.password}
                 onChange={(e) => setNewSecret(prev => ({ ...prev, password: e.target.value }))}
                 placeholder="Password"
-                className="px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
+                className="px-4 py-3 border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
               />
               <input
                 type="text"
                 value={newSecret.description}
                 onChange={(e) => setNewSecret(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Description (optional)"
-                className="px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition-colors md:col-span-2"
+                className="px-4 py-3 border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100 rounded-lg focus:outline-none focus:border-blue-500 transition-colors md:col-span-2"
               />
             </div>
             <button
@@ -402,35 +383,35 @@ function SecretsDashboard({ secrets, onAddSecret, onShowSecrets, showSecrets }: 
         )}
 
         {showSecrets && (
-          <div className="bg-white rounded-2xl p-8 shadow-lg">
-            <h3 className="text-xl font-semibold text-gray-800 mb-6">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-6">
               Stored Secrets ({secrets.length})
             </h3>
             {secrets.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🐧</div>
-                <p className="text-gray-500">No secrets stored yet. Add your first secret above!</p>
+                <p className="text-gray-500 dark:text-gray-300">No secrets stored yet. Add your first secret above!</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {secrets.map((secret, index) => (
-                  <div key={index} className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                  <div key={index} className="bg-gray-50 dark:bg-slate-900 rounded-xl p-6 border border-gray-200 dark:border-slate-700">
                     <div className="grid md:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-600 mb-1">Email</label>
-                        <p className="text-gray-800 bg-white px-3 py-2 rounded border">
+                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Email</label>
+                        <p className="text-gray-800 dark:text-gray-100 bg-white dark:bg-slate-800 px-3 py-2 rounded border dark:border-slate-700">
                           {secret.email}
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-600 mb-1">Password</label>
-                        <p className="text-gray-800 bg-white px-3 py-2 rounded border font-mono">
+                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Password</label>
+                        <p className="text-gray-800 dark:text-gray-100 bg-white dark:bg-slate-800 px-3 py-2 rounded border dark:border-slate-700 font-mono">
                           {secret.password}
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-600 mb-1">Description</label>
-                        <p className="text-gray-800 bg-white px-3 py-2 rounded border">
+                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Description</label>
+                        <p className="text-gray-800 dark:text-gray-100 bg-white dark:bg-slate-800 px-3 py-2 rounded border dark:border-slate-700">
                           {secret.description || 'No description'}
                         </p>
                       </div>
